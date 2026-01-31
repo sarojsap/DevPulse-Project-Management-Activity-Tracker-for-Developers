@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevPulse | Project Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!--Auth Section (Visible if not logged in)-->
+    <div id="auth-section" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-md w-96">
+            <h2 class="text-2xl font-bold mb-6 text-center text-green-800">DevPulse Login</h2>
+            <form id="login-form" class="space-y-4">
+                <input type="text" id="username" placeholder="Username" class="w-full p-2 border rounded" required>
+                <input type="password" id="password" placeholder="Password" class="w-full p-2 border rounded" required>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">Login</button>
+            </form>
+            <p id="login-error" class="text-red-500 mt-4 text-sm hidden">Invalid Credentials</p>
+        </div>
+    </div>
+
+    <!--Dashboard Section (Hidden by default)-->
+    <div id="dashboard-section" class="hidden min-h-screen">
+        <nav class="bg-white shadow-sm p-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-indigo-600">DevPulse</h1>
+            <button id="logout-btn" class="text-gray-600 hover:text-red-500">Logout</button>
+        </nav>
+        <main class="p-8">
+            <h2 class="text-3xl font-bold mb-6">Your Projects</h2>
+            <div id="project-list" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!--Projects will be injected here by JS-->
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+
+</body>
+</html>
