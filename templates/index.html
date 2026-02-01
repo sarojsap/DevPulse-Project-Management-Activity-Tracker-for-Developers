@@ -13,9 +13,11 @@
             <h2 class="text-2xl font-bold mb-6 text-center text-green-800">DevPulse Login</h2>
             <form id="login-form" class="space-y-4">
                 <input type="text" id="username" placeholder="Username" class="w-full p-2 border rounded" required>
+                <input type="email" id="email" placeholder="Email" class="w-full p-2 border rounded hidden">
                 <input type="password" id="password" placeholder="Password" class="w-full p-2 border rounded" required>
                 <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">Login</button>
             </form>
+            <button id="toggle-auth-mode" class="w-full mt-4 text-sm text-indigo-600 hover:underline">Need an account? Sign Up</button>
             <p id="login-error" class="text-red-500 mt-4 text-sm hidden">Invalid Credentials</p>
         </div>
     </div>
