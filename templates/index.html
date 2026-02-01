@@ -27,7 +27,34 @@
             <button id="logout-btn" class="text-gray-600 hover:text-red-500">Logout</button>
         </nav>
         <main class="p-8">
-            <h2 class="text-3xl font-bold mb-6">Your Projects</h2>
+            <!-- Add Project Button -->
+<div class="mb-8 flex justify-between items-center">
+    <h2 class="text-3xl font-bold text-gray-800">Your Projects</h2>
+    <button id="open-modal-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 shadow-md">
+        + New Project
+    </button>
+</div>
+
+<!-- Modal Overlay (Hidden by default) -->
+<div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md mx-4">
+        <h3 class="text-xl font-bold mb-4">Create New Project</h3>
+        <form id="project-form" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Project Title</label>
+                <input type="text" id="proj-title" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-indigo-500 outline-none" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea id="proj-desc" rows="3" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+            </div>
+            <div class="flex justify-end space-x-3 mt-6">
+                <button type="button" id="close-modal-btn" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Create Project</button>
+            </div>
+        </form>
+    </div>
+</div>
             <div id="project-list" class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!--Projects will be injected here by JS-->
             </div>
