@@ -10,3 +10,13 @@ class Project(models.Model):
 
     def __str__(self):
         return self.title
+
+class Task(models.Model):
+    PRIORITY_CHOICES = [('L', 'Low'), ('M', 'Medium'), ('H', 'High')]
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
+    title = models.CharField(max_length=255)
+    priority = models.CharField(max_length=1, choices=PRIORITY_CHOICES, default='M')
+    is_done = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title

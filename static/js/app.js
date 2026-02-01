@@ -89,7 +89,7 @@ async function deleteProject(id) {
     }
 }
 
-// UPDATE fetchProjects to include the Delete button
+// UPDATE fetchProjects to include Tasks + Delete button (merged)
 async function fetchProjects() {
     const token = localStorage.getItem('access_token');
     const response = await fetch(`${API_BASE}/projects/`, {
@@ -100,23 +100,100 @@ async function fetchProjects() {
     const container = document.getElementById('project-list');
     container.innerHTML = projects.map(p => `
         <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition flex flex-col justify-between">
+            
+            <!-- Project Info -->
             <div>
                 <h3 class="font-bold text-lg text-gray-800">${p.title}</h3>
-                <p class="text-gray-600 text-sm mt-2">${p.description || 'No description provided.'}</p>
+                <p class="text-gray-600 text-sm mt-2">
+                    ${p.description || 'No description provided.'}
+                </p>
             </div>
+
+            <!-- Tasks Section -->
+            <div class="mt-4 border-t pt-4">
+                <h4 class="text-xs font-bold uppercase text-gray-400 mb-2">Tasks</h4>
+                <ul class="space-y-2 mb-4">
+                    ${p.tasks.map(t => `
+                        <li class="flex items-center justify-between text-sm">
+                            <span class="${t.is_done ? 'line-through text-gray-400' : 'text-gray-700'}">
+                                ${t.title}
+                            </span>
+                            <input type="checkbox" ${t.is_done ? 'checked' : ''} 
+                                onchange="toggleTask(${t.id}, ${t.is_done})"
+                                class="rounded text-indigo-600">
+                        </li>
+                    `).join('')}
+                </ul>
+
+                <!-- Quick Add Task -->
+                <div class="flex gap-2">
+                    <input type="text" id="task-input-${p.id}" placeholder="New task..."
+                        class="text-xs border rounded p-1 flex-grow outline-none focus:border-indigo-500">
+                    <button onclick="addTask(${p.id})"
+                        class="text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">
+                        Add
+                    </button>
+                </div>
+            </div>
+
+            <!-- Status + Delete -->
             <div class="mt-6 flex justify-between items-center">
-                <span class="px-2 py-1 text-xs font-semibold rounded ${p.is_completed ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
+                <span class="px-2 py-1 text-xs font-semibold rounded ${
+                    p.is_completed 
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-yellow-100 text-yellow-700'
+                }">
                     ${p.is_completed ? 'Completed' : 'In Progress'}
                 </span>
-                <button onclick="deleteProject(${p.id})" class="text-red-400 hover:text-red-600 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+
+                <button onclick="deleteProject(${p.id})"
+                    class="text-red-400 hover:text-red-600 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                 </button>
             </div>
+
         </div>
     `).join('');
 }
+
+// ADD TASK (POST)
+async function addTask(projectId) {
+    const input = document.getElementById(`task-input-${projectId}`);
+    const title = input.value;
+    if (!title) return;
+
+    const token = localStorage.getItem('access_token');
+    await fetch(`${API_BASE}/tasks/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ project: projectId, title: title })
+    });
+    
+    fetchProjects();
+}
+
+// TOGGLE TASK STATUS (PATCH)
+async function toggleTask(taskId, currentState) {
+    const token = localStorage.getItem('access_token');
+    await fetch(`${API_BASE}/tasks/${taskId}/`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ is_done: !currentState })
+    });
+    
+    fetchProjects();
+}
+
 // Logout Logic
 document.getElementById('logout-btn').addEventListener('click', () => {
     localStorage.clear();
