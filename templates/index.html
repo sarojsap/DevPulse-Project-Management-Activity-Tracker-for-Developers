@@ -5,20 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevPulse | Project Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Spinner Animation */
+        .spinner {
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #6366f1;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body class="bg-gray-100 font-sans">
     <!--Auth Section (Visible if not logged in)-->
     <div id="auth-section" class="flex items-center justify-center min-h-screen">
         <div class="bg-white p-8 rounded-lg shadow-md w-96">
-            <h2 class="text-2xl font-bold mb-6 text-center text-green-800">DevPulse Login</h2>
-            <form id="login-form" class="space-y-4">
+            <h2 id="auth-title" class="text-2xl font-bold mb-6 text-center text-green-800">DevPulse Login</h2>
+            <form id="auth-form" class="space-y-4">
                 <input type="text" id="username" placeholder="Username" class="w-full p-2 border rounded" required>
                 <input type="email" id="email" placeholder="Email" class="w-full p-2 border rounded hidden">
                 <input type="password" id="password" placeholder="Password" class="w-full p-2 border rounded" required>
-                <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">Login</button>
+                <button type="submit" id="auth-submit-btn" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">Login</button>
             </form>
             <button id="toggle-auth-mode" class="w-full mt-4 text-sm text-indigo-600 hover:underline">Need an account? Sign Up</button>
-            <p id="login-error" class="text-red-500 mt-4 text-sm hidden">Invalid Credentials</p>
+            <p id="auth-message" class="text-red-500 mt-4 text-sm hidden">Invalid Credentials</p>
         </div>
     </div>
 
@@ -26,37 +41,74 @@
     <div id="dashboard-section" class="hidden min-h-screen">
         <nav class="bg-white shadow-sm p-4 flex justify-between items-center">
             <h1 class="text-xl font-bold text-indigo-600">DevPulse</h1>
-            <button id="logout-btn" class="text-gray-600 hover:text-red-500">Logout</button>
+            <div class="flex items-center gap-4">
+                <!-- User Info -->
+                <div class="flex items-center gap-2 text-gray-600">
+                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span id="user-display" class="font-medium text-gray-700"></span>
+                </div>
+                <button id="logout-btn" class="text-gray-600 hover:text-red-500 flex items-center gap-1">
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Logout
+                </button>
+            </div>
         </nav>
         <main class="p-8">
-            <!-- Add Project Button -->
-<div class="mb-8 flex justify-between items-center">
-    <h2 class="text-3xl font-bold text-gray-800">Your Projects</h2>
-    <button id="open-modal-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 shadow-md">
-        + New Project
-    </button>
-</div>
+            <!-- Header with Search and Add Project Button -->
+            <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h2 class="text-3xl font-bold text-gray-800">Your Projects</h2>
+                
+                <!-- Search Bar with Spinner -->
+                <div class="flex items-center gap-4 w-full md:w-auto">
+                    <div class="relative flex-grow md:flex-grow-0">
+                        <input type="text" id="search-input" placeholder="Search projects..." 
+                            class="w-full md:w-64 pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <div id="search-spinner" class="spinner absolute right-3 top-1/2 -translate-y-1/2 hidden"></div>
+                    </div>
+                    
+                    <button id="open-modal-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 shadow-md whitespace-nowrap">
+                        + New Project
+                    </button>
+                </div>
+            </div>
 
-<!-- Modal Overlay (Hidden by default) -->
-<div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md mx-4">
-        <h3 class="text-xl font-bold mb-4">Create New Project</h3>
-        <form id="project-form" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Project Title</label>
-                <input type="text" id="proj-title" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-indigo-500 outline-none" required>
+            <!-- No Results Message -->
+            <div id="no-results" class="hidden text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 class="mt-2 text-lg font-medium text-gray-900">No projects found</h3>
+                <p class="mt-1 text-gray-500">Try adjusting your search terms.</p>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Description</label>
-                <textarea id="proj-desc" rows="3" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+
+            <!-- Modal Overlay (Hidden by default) -->
+            <div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md mx-4">
+                    <h3 class="text-xl font-bold mb-4">Create New Project</h3>
+                    <form id="project-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Project Title</label>
+                            <input type="text" id="proj-title" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Description</label>
+                            <textarea id="proj-desc" rows="3" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-3 mt-6">
+                            <button type="button" id="close-modal-btn" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Create Project</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="flex justify-end space-x-3 mt-6">
-                <button type="button" id="close-modal-btn" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Create Project</button>
-            </div>
-        </form>
-    </div>
-</div>
+
             <div id="project-list" class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!--Projects will be injected here by JS-->
             </div>
